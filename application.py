@@ -7,13 +7,10 @@ from flask import Flask, request
 import boto3
 import os
 from models import db, Result
-import logging
 
 # Initialise flask factory and database
 application = Flask(__name__)
 db.init_app(application)
-
-logging.basicConfig(filename='error.log', level=logging.DEBUG)
 
 
 # Basic configuration for the application.
