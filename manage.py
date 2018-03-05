@@ -8,7 +8,7 @@ from flask_migrate import Manager, Migrate, MigrateCommand
 from application import application, Config
 from models import db
 
-app.config.from_object(Config)
+application.config.from_object(Config)
 
 migrate = Migrate(application, db)
 manager = Manager(application)
