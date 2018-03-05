@@ -10,11 +10,11 @@ from models import db, Result
 
 
 # Initialise flask factory and database
-app = Flask(__name__)
-db.init_app(app)
+application = Flask(__name__)
+db.init_app(application)
 
 
-# Basic configuration for the app.
+# Basic configuration for the application.
 class Config(object):
     S3_BUCKET = 'watermelons-training'
     S3_KEY = os.environ['S3_KEY']
@@ -38,9 +38,9 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'postgresql://%(user)s:%(pw)s@%(host)s:%(port)s/%(db)s' % POSTGRES
 
 # Setup config
-app.config.from_object(Config)
+application.config.from_object(Config)
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Make a connection to AWS S3 storage bucket to be for images.
 s3 = boto3.resource(
@@ -51,7 +51,7 @@ s3 = boto3.resource(
 
 
 # Define the route that will accept uploads (images and measurement data).
-@app.route('/upload', methods= ['POST'])
+@application.route('/upload', methods= ['GET','POST'])
 def upload_file():
     if request.method == 'POST':
         f = request.files['files']
@@ -64,10 +64,12 @@ def upload_file():
         db.session.add(result)
         db.session.commit()
         return str(result)
+    else:
+        return("GET status 200")
 
 
 
 # Run the application
 if __name__ == '__main__':
-    app.debug = True
-    app.run()
+    application.debug = True
+    application.run()
