@@ -9,9 +9,10 @@ import os
 import uuid
 
 # URL of Flask server (assuming localhost)
-url = "http://127.0.0.1:5000/upload"
+#url = "http://127.0.0.1:5000/upload"
+url = "http://watermelon-flask.hp7jzffnep.ap-southeast-2.elasticbeanstalk.com/upload"
 # File array for request
-filename = 'test3.jpg'
+filename = 'test.jpg'
 files = {'files': open(filename, 'rb')}
 ripe = 'T'
 datetime_result = datetime.datetime.now()
