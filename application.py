@@ -6,7 +6,9 @@
 from flask import Flask, request
 import boto3
 import os
-from models import db, Result
+from models import db, Result, Reading
+from sqlalchemy.dialects.postgresql import ARRAY, array
+import json
 
 # Initialise flask factory and database
 application = Flask(__name__)
@@ -57,10 +59,21 @@ def upload_file():
         r = True if request.form['r'] == 'T' else False
         d = request.form['d']
         k = request.form['k']
+        spect = array(json.loads(request.form['spe']))
+        laser = True if request.form['la'] == 'T' else False
+        led = True if request.form['le'] == 'T' else False
         print("{} {}: Ripe = {}".format(d, k, r))
         s3_return = s3.Bucket(Config.S3_BUCKET).put_object(Key=k, Body=f.read())
-        result = Result(s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
-        db.session.add(result)
+        if(len(spect)):
+            reading = Reading(timestamp=d,reading=db.cast(spect, ARRAY(db.Integer)), laser=laser, led=led)
+            result = Result(s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
+            result.readings.append(reading)
+            db.session.add(result)
+            db.session.add(reading)
+        else:
+            result = Result(s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
+            db.session.add(result)
+
         db.session.commit()
         return str(result)
     else:

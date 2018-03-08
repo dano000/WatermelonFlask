@@ -3,6 +3,11 @@
 # Project: Capstone TA-IP 2018 (Watermelon Capstone)
 # Description: For managing migrations for Flask app.
 
+# Original Source: https://blog.miguelgrinberg.com/post/flask-migrate-alembic-database-migration-wrapper-for-flask
+
+# Usage:    python manage.py db migrate # To generate the database migrations (of what you want the changes to be).
+#           python manage.py db upgrade # Perform an upgrade to a newer migration (execute a new migration on db).
+
 from flask_migrate import Manager, Migrate, MigrateCommand
 
 from application import application, Config
