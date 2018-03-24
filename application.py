@@ -109,7 +109,7 @@ def view_reading(id):
 
 
 @application.route('/result/json/pi/<pi_id>')
-def json_result(pi_id):
+def json_result_pi_id(pi_id):
     if request.method == 'GET':
         result = Result.query.filter_by(pi_id=pi_id).first_or_404()
         return jsonify(result.to_json())
