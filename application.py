@@ -101,10 +101,17 @@ def view_reading(id):
         return render_template("show_reading.html",reading=reading)
 
 
-@application.route('/result/json/<pi_id>')
+@application.route('/result/json/pi/<pi_id>')
 def json_result(pi_id):
     if request.method == 'GET':
         result = Result.query.filter_by(pi_id=pi_id).first_or_404()
+        return jsonify(result.to_json())
+
+
+@application.route('/result/json/id/<id>')
+def json_result(id):
+    if request.method == 'GET':
+        result = Result.query.filter_by(id=id).first_or_404()
         return jsonify(result.to_json())
 
 
