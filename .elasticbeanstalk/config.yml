@@ -2,6 +2,10 @@ branch-defaults:
   master:
     environment: watermelon-flask
     group_suffix: null
+environment-defaults:
+  watermelon-flask:
+    branch: null
+    repository: null
 global:
   application_name: WatermelonFlask
   branch: null

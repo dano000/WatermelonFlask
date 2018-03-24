@@ -1,0 +1,42 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Watermelon Data{% endblock %}
+<!--<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> -->
+{% block navbar %}
+{% endblock %}
+{% block content %}
+  <h1>Watermelon Data View</h1>
+    <h2>Result</h2>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-8">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>ID</th>
+                                <th>Pi ID</th>
+                                <th>Ripe</th>
+                            <tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ result.timestamp }}</td>
+                                <td>{{ result.id }}</td>
+                                <td>{{ result.pi_id }}</td>
+                                <td>{{ result.ripe }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+            </div>
+            <div class="col-sm-4">
+                <img src={{ s3_image_url }}>
+
+            </div>
+        </div>
+            <div class="row">
+                <h2>Reading</h2>
+
+            </div>
+    </div>
+
+{% endblock %}

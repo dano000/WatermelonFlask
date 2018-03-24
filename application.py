@@ -3,16 +3,20 @@
 # Project: Capstone TA-IP 2018 (Watermelon Capstone)
 # Description: Flask Server for handling image/data uploads to AWS.
 
-from flask import Flask, request
+from flask import Flask, request, render_template, jsonify
 import boto3
 import os
 from models import db, Result, Reading
 from sqlalchemy.dialects.postgresql import ARRAY, array
 import json
+from flask_bootstrap import Bootstrap
+from io import StringIO
 
 # Initialise flask factory and database
 application = Flask(__name__)
+Bootstrap(application)
 db.init_app(application)
+application.config['BOOTSTRAP_SERVE_LOCAL'] = True
 
 
 # Basic configuration for the application.
@@ -21,9 +25,8 @@ class Config(object):
     S3_KEY = os.environ['S3_KEY']
     S3_SECRET = os.environ['S3_SECRET']
     S3_LOCATION = 'http://{}.s3.amazonaws.com/'.format(S3_BUCKET)
+    S3_ENDPOINT = "https://s3-ap-southeast-2.amazonaws.com/{}/".format(S3_BUCKET)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-
     SECRET_KEY = os.urandom(32)
     DEBUG = True
     PORT = 5000
@@ -56,29 +59,72 @@ s3 = boto3.resource(
 def upload_file():
     if request.method == 'POST':
         f = request.files['files']
+        pi_id = request.form['pi_i']
+        r_ids = json.loads(request.form['r_ids'])
+        pi_serial = request.form['pi_s']
         r = True if request.form['r'] == 'T' else False
         d = request.form['d']
         k = request.form['k']
-        spect = array(json.loads(request.form['spe']))
+        spect = list(map(lambda x: array(x), json.loads(request.form['spe'])))
         laser = True if request.form['la'] == 'T' else False
         led = True if request.form['le'] == 'T' else False
-        print("{} {}: Ripe = {}".format(d, k, r))
+        uv = True if request.form['uv'] == 'T' else False
         s3_return = s3.Bucket(Config.S3_BUCKET).put_object(Key=k, Body=f.read())
-        if(len(spect)):
-            reading = Reading(timestamp=d,reading=db.cast(spect, ARRAY(db.Integer)), laser=laser, led=led)
-            result = Result(s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
-            result.readings.append(reading)
+        if(len(spect[0]) and len(spect)):
+            result = Result(pi_id=pi_id, pi_serial=pi_serial, s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
             db.session.add(result)
-            db.session.add(reading)
+            for i,s in enumerate(spect):
+                reading = Reading(id=r_ids[i],timestamp=d,pi_id=pi_id,pi_serial=pi_serial,reading=db.cast(s, ARRAY(db.Integer)), laser=laser, led=led, uv=uv)
+                result.readings.append(reading)
+                db.session.add(reading)
         else:
-            result = Result(s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
+            result = Result(pi_id=pi_id, pi_serial=pi_serial, s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
             db.session.add(result)
 
         db.session.commit()
         return str(result)
     else:
-        return("GET status 200")
+        return("POST API Endpoint only")
 
+
+@application.route('/result/id/<pi_id>')
+def view_result(pi_id):
+    if request.method == 'GET':
+        result = Result.query.filter_by(pi_id=pi_id).first_or_404()
+        return render_template("show_result.html",result=result, s3_image_url=Config.S3_ENDPOINT + result.s3_key)
+
+
+@application.route('/reading/id/<id>')
+def view_reading(id):
+    if request.method == 'GET':
+        reading = Reading.query.filter_by(id=id).first_or_404()
+        return render_template("show_reading.html",reading=reading)
+
+
+@application.route('/result/json/<pi_id>')
+def json_result(pi_id):
+    if request.method == 'GET':
+        result = Result.query.filter_by(pi_id=pi_id).first_or_404()
+        return jsonify(result.to_json())
+
+
+@application.route('/reading/json/<id>')
+def json_reading(id):
+    if request.method == 'GET':
+        reading = Reading.query.filter_by(id=id).first_or_404()
+        return jsonify(reading.to_json())
+
+
+@application.route('/result/all')
+def get_all_results():
+    all_json = [i.to_json() for i in Result.query.all()]
+    return jsonify(json_list=all_json)
+
+
+@application.route('/reading/all')
+def get_all_readings():
+    all_json = [i.to_json() for i in Reading.query.all()]
+    return jsonify(json_list=all_json)
 
 
 # Run the application
