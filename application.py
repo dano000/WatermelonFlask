@@ -87,8 +87,15 @@ def upload_file():
         return("POST API Endpoint only")
 
 
-@application.route('/result/id/<pi_id>')
-def view_result(pi_id):
+@application.route('/result/id/<id>')
+def view_result(id):
+    if request.method == 'GET':
+        result = Result.query.filter_by(id=id).first_or_404()
+        return render_template("show_result.html",result=result, s3_image_url=Config.S3_ENDPOINT + result.s3_key)
+
+
+@application.route('/result/pi_id/<pi_id>')
+def view_result_pi_id(pi_id):
     if request.method == 'GET':
         result = Result.query.filter_by(pi_id=pi_id).first_or_404()
         return render_template("show_result.html",result=result, s3_image_url=Config.S3_ENDPOINT + result.s3_key)
