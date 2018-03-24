@@ -16,7 +16,9 @@ from io import StringIO
 application = Flask(__name__)
 Bootstrap(application)
 db.init_app(application)
-application.config['BOOTSTRAP_SERVE_LOCAL'] = True
+
+if(os.environ['RDS_HOSTNAME'] == 'localhost'):
+    application.config['BOOTSTRAP_SERVE_LOCAL'] = True
 
 
 # Basic configuration for the application.
