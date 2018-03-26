@@ -79,10 +79,6 @@ def upload_file():
             result = Result(pi_id=pi_id, pi_serial=pi_serial, s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
             db.session.add(result)
             for i,s in enumerate(spect):
-                print("R_ids:")
-                print(r_ids[i])
-                print("laser, led, uv")
-                print(laser[i], led[i], uv[i])
                 reading = Reading(id=r_ids[i],timestamp=d,pi_id=pi_id,pi_serial=pi_serial,reading=db.cast(s, ARRAY(db.Integer)), laser=laser[i], led=led[i], uv=uv[i])
                 result.readings.append(reading)
                 db.session.add(reading)
