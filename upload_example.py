@@ -53,12 +53,23 @@ spect = [[
     744, 772, 778, 731
 ]]
 # Laser was OFF, LED was ON
-la = 'F'
-le = 'F'
-uv = 'F'
+la = ['F','F']
+le = ['F','F']
+uv = ['F','T']
 
-r_ids = [12,13]
-data = {'pi_i':'30','r_ids':json.dumps(r_ids), 'pi_s':'123', 'r': ripe, 'd': datetime_result, 'k': unique_id, 'spe': json.dumps(spect),'le': le, 'la': la, 'uv':uv}
+r_ids = [30,31]
+data = {
+    'pi_i':'49',
+    'r_ids': json.dumps(r_ids),
+    'pi_s':'123',
+    'r': ripe,
+    'd': datetime_result,
+    'k': unique_id,
+    'spe': json.dumps(spect),
+    'le': json.dumps(le),
+    'la': json.dumps(la),
+    'uv': json.dumps(uv)
+}
 # Add both the file image to upload, and accompanying data and POST
 r = requests.post(url, files=files, data=data)
 print(str(r.content))

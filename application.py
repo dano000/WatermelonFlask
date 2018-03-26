@@ -56,6 +56,9 @@ s3 = boto3.resource(
 )
 
 
+def string_t(string):
+    return True if string == 'T' else False
+
 # Define the route that will accept uploads (images and measurement data).
 @application.route('/upload', methods= ['GET','POST'])
 def upload_file():
@@ -68,15 +71,19 @@ def upload_file():
         d = request.form['d']
         k = request.form['k']
         spect = list(map(lambda x: array(x), json.loads(request.form['spe'])))
-        laser = True if request.form['la'] == 'T' else False
-        led = True if request.form['le'] == 'T' else False
-        uv = True if request.form['uv'] == 'T' else False
+        laser = list(map(lambda x: string_t(x), json.loads(request.form['la'])))
+        led = list(map(lambda x: string_t(x), json.loads(request.form['le'])))
+        uv = list(map(lambda x: string_t(x), json.loads(request.form['uv'])))
         s3_return = s3.Bucket(Config.S3_BUCKET).put_object(Key=k, Body=f.read())
         if(len(spect[0]) and len(spect)):
             result = Result(pi_id=pi_id, pi_serial=pi_serial, s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
             db.session.add(result)
             for i,s in enumerate(spect):
-                reading = Reading(id=r_ids[i],timestamp=d,pi_id=pi_id,pi_serial=pi_serial,reading=db.cast(s, ARRAY(db.Integer)), laser=laser, led=led, uv=uv)
+                print("R_ids:")
+                print(r_ids[i])
+                print("laser, led, uv")
+                print(laser[i], led[i], uv[i])
+                reading = Reading(id=r_ids[i],timestamp=d,pi_id=pi_id,pi_serial=pi_serial,reading=db.cast(s, ARRAY(db.Integer)), laser=laser[i], led=led[i], uv=uv[i])
                 result.readings.append(reading)
                 db.session.add(reading)
         else:
