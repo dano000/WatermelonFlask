@@ -11,7 +11,7 @@ import json
 
 # URL of Flask server (assuming localhost)
 url = "http://127.0.0.1:5000/upload"
-#url = "http://watermelon-flask.hp7jzffnep.ap-southeast-2.elasticbeanstalk.com/upload"
+# url = "http://watermelon-flask.hp7jzffnep.ap-southeast-2.elasticbeanstalk.com/upload"
 # File array for request
 filename = 'test.jpg'
 files = {'files': open(filename, 'rb')}
@@ -57,9 +57,9 @@ la = ['F','F']
 le = ['F','F']
 uv = ['F','T']
 
-r_ids = [30,31]
+r_ids = [228,229]
 data = {
-    'pi_i':'49',
+    'pi_i':'233',
     'r_ids': json.dumps(r_ids),
     'pi_s':'123',
     'r': ripe,

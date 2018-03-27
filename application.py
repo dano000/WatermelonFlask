@@ -10,7 +10,10 @@ from models import db, Result, Reading
 from sqlalchemy.dialects.postgresql import ARRAY, array
 import json
 from flask_bootstrap import Bootstrap
-from io import StringIO
+import tensorflow as tf
+import numpy as np
+import model
+import cv2
 
 # Initialise flask factory and database
 application = Flask(__name__)
@@ -56,6 +59,30 @@ s3 = boto3.resource(
 )
 
 
+class tfPredictor():
+    def __init__(self):
+        self.predictor = tf.estimator.Estimator(
+            model_fn=model.model, model_dir="./Model/")
+
+    def image_process(self, imagefile):
+        np_array = np.fromstring(imagefile, np.uint8)
+        np_image = cv2.imdecode(np_array, cv2.IMREAD_GRAYSCALE)
+        return cv2.resize(np_image, (28, 28))
+
+    def eval_result(self, image):
+        eval_data = np.reshape(self.image_process(image),[1,28,28,1]).astype(np.float32)
+        predict_input_fn = tf.estimator.inputs.numpy_input_fn(
+             x={"x": eval_data},
+             num_epochs=1,
+             shuffle=False)
+        eval_results = list(self.predictor.predict(input_fn=predict_input_fn))
+        return eval_results
+
+
+# Initialise predictor
+predictor = tfPredictor()
+
+
 def string_t(string):
     return True if string == 'T' else False
 
@@ -74,7 +101,8 @@ def upload_file():
         laser = list(map(lambda x: string_t(x), json.loads(request.form['la'])))
         led = list(map(lambda x: string_t(x), json.loads(request.form['le'])))
         uv = list(map(lambda x: string_t(x), json.loads(request.form['uv'])))
-        s3_return = s3.Bucket(Config.S3_BUCKET).put_object(Key=k, Body=f.read())
+        read_file = f.read()
+        s3_return = s3.Bucket(Config.S3_BUCKET).put_object(Key=k, Body=read_file)
         if(len(spect[0]) and len(spect)):
             result = Result(pi_id=pi_id, pi_serial=pi_serial, s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
             db.session.add(result)
@@ -87,7 +115,8 @@ def upload_file():
             db.session.add(result)
 
         db.session.commit()
-        return str(result)
+        eval_result = predictor.eval_result(read_file)
+        return (str(result) + str(eval_result))
     else:
         return("POST API Endpoint only")
 
