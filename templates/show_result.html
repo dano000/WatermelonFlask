@@ -9,10 +9,12 @@
 <!-- jQuery library -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <h1>Watermelon Data View</h1>
-    <h2>Result</h2>
     <div class="container">
         <div class="row">
+            <h2>Result</h2>
             <div class="col-sm-8">
+            <div class="row">
+            <div class="col-sm-12">
                     <table class="table">
                         <thead>
                             <tr>
@@ -20,6 +22,8 @@
                                 <th>ID</th>
                                 <th>Pi ID</th>
                                 <th>Ripe</th>
+                                <th>Weather</th>
+                                <th>Slap Type</th>
                             <tr>
                         </thead>
                         <tbody>
@@ -28,10 +32,22 @@
                                 <td>{{ result.id }}</td>
                                 <td>{{ result.pi_id }}</td>
                                 <td>{{ result.ripe }}</td>
+                                <td>{{ result.weather }}</td>
+                                <td>{{ result.slap_type }}</td>
                             </tr>
                         </tbody>
                     </table>
             </div>
+                </div>
+                <div class="row">
+                <div class="col-sm-12">
+                     <audio controls>
+  <source src={{ s3_audio_url }} type="audio/mpeg">
+Your browser does not support the audio element.
+</audio>
+                </div>
+                </div>
+                </div>
             <div class="col-sm-4">
                 <img class="img-responsive" src={{ s3_image_url }}>
 

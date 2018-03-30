@@ -90,33 +90,44 @@ def string_t(string):
 @application.route('/upload', methods= ['GET','POST'])
 def upload_file():
     if request.method == 'POST':
-        f = request.files['files']
+        f_image = request.files.getlist('image')[0]
+        print(f_image)
+        f_audio = request.files.getlist('audio')[0]
+        print(f_audio)
         pi_id = request.form['pi_i']
         r_ids = json.loads(request.form['r_ids'])
         pi_serial = request.form['pi_s']
         r = True if request.form['r'] == 'T' else False
         d = request.form['d']
         k = request.form['k']
+        i = request.form['i']
+        w = request.form['w']
+        s = request.form['s']
         spect = list(map(lambda x: array(x), json.loads(request.form['spe'])))
         laser = list(map(lambda x: string_t(x), json.loads(request.form['la'])))
         led = list(map(lambda x: string_t(x), json.loads(request.form['le'])))
         uv = list(map(lambda x: string_t(x), json.loads(request.form['uv'])))
-        read_file = f.read()
-        s3_return = s3.Bucket(Config.S3_BUCKET).put_object(Key=k, Body=read_file)
+        read_image = f_image.read()
+        read_audio = f_audio.read()
+        s3_image_return = s3.Bucket(Config.S3_BUCKET).put_object(Key=k, Body=read_image)
+        s3_audio_return = s3.Bucket(Config.S3_BUCKET).put_object(Key=i, Body=read_audio)
         if(len(spect[0]) and len(spect)):
-            result = Result(pi_id=pi_id, pi_serial=pi_serial, s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
+            result = Result(pi_id=pi_id, pi_serial=pi_serial, s3_key=k, etag=s3_image_return.e_tag, ripe=r, timestamp=d, weather=w, slap_type=s,s3_audio_key=i, etag_audio=s3_audio_return.e_tag)
             db.session.add(result)
             for i,s in enumerate(spect):
                 reading = Reading(id=r_ids[i],timestamp=d,pi_id=pi_id,pi_serial=pi_serial,reading=db.cast(s, ARRAY(db.Integer)), laser=laser[i], led=led[i], uv=uv[i])
                 result.readings.append(reading)
                 db.session.add(reading)
         else:
-            result = Result(pi_id=pi_id, pi_serial=pi_serial, s3_key=k, etag=s3_return.e_tag, ripe=r, timestamp=d)
+            result = Result(pi_id=pi_id, pi_serial=pi_serial, s3_key=k, etag=s3_image_return.e_tag, ripe=r, timestamp=d, weather=w, slap_type=s,s3_audio_key=i, etag_audio=s3_audio_return.e_tag)
             db.session.add(result)
 
         db.session.commit()
-        eval_result = predictor.eval_result(read_file)
-        return (str(result) + str(eval_result))
+        #eval_result = predictor.eval_result(read_file)
+
+        #print("result:",str(result))
+        #print("eval:",str(eval_result))
+        return (str(result))
     else:
         return("POST API Endpoint only")
 
@@ -132,7 +143,7 @@ def view_result(id):
 def view_result_pi_id(pi_id):
     if request.method == 'GET':
         result = Result.query.filter_by(pi_id=pi_id).first_or_404()
-        return render_template("show_result.html",result=result, s3_image_url=Config.S3_ENDPOINT + result.s3_key)
+        return render_template("show_result.html",result=result, s3_image_url=Config.S3_ENDPOINT + result.s3_key, s3_audio_url=Config.S3_ENDPOINT + result.s3_audio_key)
 
 
 @application.route('/reading/id/<id>')

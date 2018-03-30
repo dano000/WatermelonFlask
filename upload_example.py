@@ -11,13 +11,15 @@ import json
 
 # URL of Flask server (assuming localhost)
 url = "http://127.0.0.1:5000/upload"
-# url = "http://watermelon-flask.hp7jzffnep.ap-southeast-2.elasticbeanstalk.com/upload"
+#url = "http://watermelon-flask.hp7jzffnep.ap-southeast-2.elasticbeanstalk.com/upload"
 # File array for request
-filename = 'test.jpg'
-files = {'files': open(filename, 'rb')}
+image = 'test.jpg'
+audio = 'test.wav'
+files = {'image': open(image, 'rb'), 'audio': open(audio,'rb')}
 ripe = 'T'
 datetime_result = datetime.datetime.now()
-unique_id = str(uuid.uuid4()) + os.path.splitext(filename)[-1]
+unique_id = str(uuid.uuid4()) + os.path.splitext(image)[-1]
+unique_id_audio = str(uuid.uuid4()) + os.path.splitext(audio)[-1]
 # Sample Spectrometer reading
 spect = [[
     121, 121, 951, 978, 977, 965, 969, 963, 956, 966, 979, 954, 965, 964, 970, 970, 975, 972, 964, 958, 958, 959,
@@ -57,18 +59,22 @@ la = ['F','F']
 le = ['F','F']
 uv = ['F','T']
 
-r_ids = [228,229]
+r_ids = [245,246]
 data = {
-    'pi_i':'233',
+    'pi_i':'236',
     'r_ids': json.dumps(r_ids),
     'pi_s':'123',
     'r': ripe,
     'd': datetime_result,
     'k': unique_id,
+    'i': unique_id_audio,
     'spe': json.dumps(spect),
     'le': json.dumps(le),
     'la': json.dumps(la),
-    'uv': json.dumps(uv)
+    'uv': json.dumps(uv),
+    'w': 'Sunny',
+    's': 'Hand',
+
 }
 # Add both the file image to upload, and accompanying data and POST
 r = requests.post(url, files=files, data=data)
