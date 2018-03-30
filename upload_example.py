@@ -10,11 +10,11 @@ import uuid
 import json
 
 # URL of Flask server (assuming localhost)
-url = "http://127.0.0.1:5000/upload"
-#url = "http://watermelon-flask.hp7jzffnep.ap-southeast-2.elasticbeanstalk.com/upload"
+#url = "http://127.0.0.1:5000/upload"
+url = "http://watermelon-flask.hp7jzffnep.ap-southeast-2.elasticbeanstalk.com/upload"
 # File array for request
 image = 'test.jpg'
-audio = 'test.wav'
+audio = 'test2.wav'
 files = {'image': open(image, 'rb'), 'audio': open(audio,'rb')}
 ripe = 'T'
 datetime_result = datetime.datetime.now()
@@ -59,9 +59,9 @@ la = ['F','F']
 le = ['F','F']
 uv = ['F','T']
 
-r_ids = [245,246]
+r_ids = [248,249]
 data = {
-    'pi_i':'236',
+    'pi_i':'237',
     'r_ids': json.dumps(r_ids),
     'pi_s':'123',
     'r': ripe,
