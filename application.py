@@ -136,7 +136,7 @@ def upload_file():
 def view_result(id):
     if request.method == 'GET':
         result = Result.query.filter_by(id=id).first_or_404()
-        return render_template("show_result.html",result=result, s3_image_url=Config.S3_ENDPOINT + result.s3_key)
+        return render_template("show_result.html",result=result, s3_image_url=Config.S3_ENDPOINT + result.s3_key, s3_audio_url=Config.S3_ENDPOINT + result.s3_audio_key)
 
 
 @application.route('/result/pi_id/<pi_id>')
