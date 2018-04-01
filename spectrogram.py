@@ -1,5 +1,8 @@
-import matplotlib.pyplot as plt, mpld3
 import matplotlib
+import matplotlib.pyplot as plt, mpld3
+matplotlib.use('agg',warn=False, force=True)
+from matplotlib import pyplot as plt
+print "Switched to:",matplotlib.get_backend()
 import numpy as np
 
 a0 = 308.3544123
