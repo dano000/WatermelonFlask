@@ -93,9 +93,7 @@ def string_t(string):
 def upload_file():
     if request.method == 'POST':
         f_image = request.files.getlist('image')[0]
-        print(f_image)
         f_audio = request.files.getlist('audio')[0]
-        print(f_audio)
         pi_id = request.form['pi_i']
         r_ids = json.loads(request.form['r_ids'])
         pi_serial = request.form['pi_s']
@@ -151,9 +149,6 @@ def view_result(id):
         except:
             s3_audio_url = Config.S3_ENDPOINT + ''
 
-        print("S3 key")
-        print(Config.S3_ENDPOINT + result.s3_key)
-
         return render_template("show_result.html",result=result,html_spect=generate_html_spectrogram(average_spect), s3_image_url=Config.S3_ENDPOINT + result.s3_key, s3_audio_url=s3_audio_url, is_picture=is_picture, is_video=is_video)
 
 
@@ -173,9 +168,6 @@ def view_result_pi_id(pi_id):
             s3_audio_url = Config.S3_ENDPOINT + result.s3_audio_key
         except:
             s3_audio_url = Config.S3_ENDPOINT + ''
-
-        print("S3 key")
-        print(Config.S3_ENDPOINT + result.s3_key)
 
         return render_template("show_result.html",result=result, html_spect=generate_html_spectrogram(average_spect), s3_image_url=Config.S3_ENDPOINT + result.s3_key, s3_audio_url=s3_audio_url, is_picture=is_picture, is_video=is_video)
 
