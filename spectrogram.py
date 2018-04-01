@@ -1,5 +1,6 @@
 import matplotlib, mpld3
 matplotlib.use('agg',warn=False, force=True)
+from matplotlib import pyplot as plt
 import numpy as np
 
 a0 = 308.3544123
@@ -23,9 +24,9 @@ def get_average_spectrogram(input_spectra):
 
 
 def generate_raw_spectrogram(input_array):
-    out_plot = matplotlib.pyplot.plot(wavelengths_x, input_array)
-    matplotlib.pyplot.ylabel('Intensity')
-    matplotlib.pyplot.xlabel('Wavelength')
+    out_plot = plt.plot(wavelengths_x, input_array)
+    plt.ylabel('Intensity')
+    plt.xlabel('Wavelength')
 
     return out_plot
 
@@ -36,17 +37,17 @@ def generate_relative_spectrogram(input_array):
 
     scaled_inputs = [(i / max_value) for i in input_array]
 
-    out_plot = matplotlib.pyplot.plot(wavelengths_x, scaled_inputs)
-    matplotlib.pyplot.ylabel('Relative Intensity %')
-    matplotlib.pyplot.xlabel('Wavelength')
+    out_plot = plt.plot(wavelengths_x, scaled_inputs)
+    plt.ylabel('Relative Intensity %')
+    plt.xlabel('Wavelength')
 
-    matplotlib.pyplot.annotate("Peak Wavelength: {}nm".format(round(wavelengths_x[max_arg], 1)), xy=(0.3, 0.05),
+    plt.annotate("Peak Wavelength: {}nm".format(round(wavelengths_x[max_arg], 1)), xy=(0.3, 0.05),
                  xycoords='axes fraction', fontsize=10)
 
     return out_plot
 
 def generate_html_spectrogram(intput_array):
-    fig = matplotlib.pyplot.figure()
+    fig = plt.figure()
     generate_relative_spectrogram(intput_array)
 
     return(mpld3.fig_to_html(fig))
