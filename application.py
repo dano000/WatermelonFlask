@@ -15,6 +15,8 @@ import numpy as np
 import model
 import cv2
 
+from spectrogram import generate_html_spectrogram, get_average_spectrogram
+
 # Initialise flask factory and database
 application = Flask(__name__)
 Bootstrap(application)
@@ -136,21 +138,53 @@ def upload_file():
 def view_result(id):
     if request.method == 'GET':
         result = Result.query.filter_by(id=id).first_or_404()
-        return render_template("show_result.html",result=result, s3_image_url=Config.S3_ENDPOINT + result.s3_key, s3_audio_url=Config.S3_ENDPOINT + result.s3_audio_key)
+        if(result):
+            average_spect = get_average_spectrogram(list(map(lambda x: x.reading, result.readings)))
+        else:
+            average_spect = ''
+
+        is_picture = True if (result.s3_key[-4:] == '.jpg') else False
+        is_video = True if (result.s3_key[-4:] == '.mp4' or result.s3_key[-5:] == '.mpeg' or result.s3_key[-5:] == '.h264') else False
+
+        try:
+            s3_audio_url = Config.S3_ENDPOINT + result.s3_audio_key
+        except:
+            s3_audio_url = Config.S3_ENDPOINT + ''
+
+        print("S3 key")
+        print(Config.S3_ENDPOINT + result.s3_key)
+
+        return render_template("show_result.html",result=result,html_spect=generate_html_spectrogram(average_spect), s3_image_url=Config.S3_ENDPOINT + result.s3_key, s3_audio_url=s3_audio_url, is_picture=is_picture, is_video=is_video)
 
 
 @application.route('/result/pi_id/<pi_id>')
 def view_result_pi_id(pi_id):
     if request.method == 'GET':
         result = Result.query.filter_by(pi_id=pi_id).first_or_404()
-        return render_template("show_result.html",result=result, s3_image_url=Config.S3_ENDPOINT + result.s3_key, s3_audio_url=Config.S3_ENDPOINT + result.s3_audio_key)
+        if (result):
+            average_spect = get_average_spectrogram(list(map(lambda x: x.reading, result.readings)))
+        else:
+            average_spect = ''
+
+        is_picture = True if (result.s3_key[-4:] == '.jpg') else False
+        is_video = True if (result.s3_key[-4:] == '.mp4') else False
+
+        try:
+            s3_audio_url = Config.S3_ENDPOINT + result.s3_audio_key
+        except:
+            s3_audio_url = Config.S3_ENDPOINT + ''
+
+        print("S3 key")
+        print(Config.S3_ENDPOINT + result.s3_key)
+
+        return render_template("show_result.html",result=result, html_spect=generate_html_spectrogram(average_spect), s3_image_url=Config.S3_ENDPOINT + result.s3_key, s3_audio_url=s3_audio_url, is_picture=is_picture, is_video=is_video)
 
 
 @application.route('/reading/id/<id>')
 def view_reading(id):
     if request.method == 'GET':
         reading = Reading.query.filter_by(id=id).first_or_404()
-        return render_template("show_reading.html",reading=reading)
+        return render_template("show_reading.html",reading=reading, html_spect=generate_html_spectrogram(reading.reading))
 
 
 @application.route('/result/json/pi/<pi_id>')

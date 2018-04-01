@@ -10,10 +10,11 @@
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
   <h1>Watermelon Data View</h1>
-    <div class="container">
+    <div class="container-fluid">
         <div class="row">
-            <h2>Result</h2>
+
             <div class="col-sm-8">
+                <h2>Result</h2>
             <div class="row">
             <div class="col-sm-12">
                     <table class="table">
@@ -42,22 +43,29 @@
                 </div>
                 <div class="row">
                 <div class="col-sm-12">
+
                      <audio controls>
   <source src={{ s3_audio_url }}>
 Your browser does not support the audio element.
 </audio>
                 </div>
+                    <div class="col-sm-12">
+                        <h2>Averaged Reading</h2>
+                        {{ html_spect|safe }}
+                    </div>
                 </div>
                 </div>
             <div class="col-sm-4">
+                {% if(is_picture) %}
                 <img class="img-responsive" src={{ s3_image_url }}>
+                {% endif %}
+                {% if(is_video) %}
+                    <video src={{ s3_image_url }} class="img-responsive" type="video/mp4" controls>
+                    </video>
+                {% endif %}
 
             </div>
         </div>
-            <div class="row">
-                <h2>Reading</h2>
-
-            </div>
     </div>
 
 {% endblock %}
