@@ -1,0 +1,121 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Watermelon Data{% endblock %}
+<!--<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}"> -->
+{% block navbar %}
+{% endblock %}
+{% block content %}
+    <!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+  <h1>Watermelon Data View</h1>
+    <div class="container-fluid">
+        <div class="row">
+
+            <div class="col-sm-8">
+                <h2>Results Summary</h2>
+            <div class="row">
+            <div class="col-sm-12">
+                <h3>Last Result: Recorded {{ time_since_last_update }} ago</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>ID</th>
+                                <th>Pi ID</th>
+                                <th>Ripe</th>
+                                <th>Weather</th>
+                                <th>Slap Type</th>
+                                <th>Pi Serial Number</th>
+                                <th>S3 Video Key</th>
+                                <th>S3 Audio Key</th>
+                            <tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ last_result.timestamp }}</td>
+                                <td>{{ last_result.id }}</td>
+                                <td>{{ last_result.pi_id }}</td>
+                                <td>{{ last_result.ripe }}</td>
+                                <td>{{ last_result.weather }}</td>
+                                <td>{{ last_result.slap_type }}</td>
+                                <td>{{ last_result.pi_serial }}</td>
+                                <td>{{ last_result.s3_key }}</td>
+                                <td>{{ last_result.s3_audio_key }}</td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+            </div>
+                 <div class="col-sm-12">
+                     <h3>List of Results</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>ID</th>
+                                <th>Pi ID</th>
+                                <th>Ripe</th>
+                                <th>Weather</th>
+                                <th>Slap Type</th>
+                                <th>Pi Serial Number</th>
+                                <th>S3 Video Key</th>
+                                <th>S3 Audio Key</th>
+                            <tr>
+                        </thead>
+                        <tbody>
+                        {% for result in all_results.items %}
+                            <tr>
+                                <td>{{ result.timestamp }}</td>
+                                <td>{{ result.id }}</td>
+                                <td>{{ result.pi_id }}</td>
+                                <td>{{ result.ripe }}</td>
+                                <td>{{ result.weather }}</td>
+                                <td>{{ result.slap_type }}</td>
+                                <td>{{ result.pi_serial }}</td>
+                                <td>{{ result.s3_key }}</td>
+                                <td>{{ result.s3_audio_key }}</td>
+
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                  {% if prev_url %}
+    <a href="{{ prev_url }}">Newer Records</a>
+    {% endif %}
+    {% if next_url %}
+    <a href="{{ next_url }}">Older Records</a>
+    {% endif %}
+            </div>
+                </div>
+                </div>
+            <div class="col-sm-4">
+            <div class="row">
+                {% if(is_picture) %}
+                    <h3>Latest Recorded Picture</h3>
+                <img class="img-responsive" src={{ s3_image_url }}>
+                {% endif %}
+                {% if(is_video) %}
+                    <h3>Latest Recorded Video</h3>
+                    <video src={{ s3_image_url }} class="img-responsive" type="video/mp4" controls>
+                    </video>
+                {% endif %}
+            </div>
+                            <div class="row">
+                    <h3>Latest Recorded Audio</h3>
+                     <audio controls>
+  <source src={{ s3_audio_url }}>
+Your browser does not support the audio element.
+</audio>
+
+                </div>
+            <div class="row">
+                <h3>Latest Averaged Reading</h3>
+                {{ html_spect|safe }}
+            </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

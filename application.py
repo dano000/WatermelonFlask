@@ -3,22 +3,29 @@
 # Project: Capstone TA-IP 2018 (Watermelon Capstone)
 # Description: Flask Server for handling image/data uploads to AWS.
 
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, request, render_template, jsonify, url_for
 import boto3
 import os
 from models import db, Result, Reading
+from sqlalchemy import desc
 from sqlalchemy.dialects.postgresql import ARRAY, array
 import json
 from flask_bootstrap import Bootstrap
+from flask_basicauth import BasicAuth
 import tensorflow as tf
 import numpy as np
 import model
 import cv2
+import datetime
 
 from spectrogram import generate_html_spectrogram, get_average_spectrogram
 
 # Initialise flask factory and database
 application = Flask(__name__)
+application.config['BASIC_AUTH_USERNAME'] = 'watermelons'
+application.config['BASIC_AUTH_PASSWORD'] = 'watermelons'
+
+basic_auth = BasicAuth(application)
 Bootstrap(application)
 db.init_app(application)
 
@@ -133,6 +140,7 @@ def upload_file():
 
 
 @application.route('/result/id/<id>')
+@basic_auth.required
 def view_result(id):
     if request.method == 'GET':
         result = Result.query.filter_by(id=id).first_or_404()
@@ -152,7 +160,44 @@ def view_result(id):
         return render_template("show_result.html",result=result,html_spect=generate_html_spectrogram(average_spect), s3_image_url=Config.S3_ENDPOINT + result.s3_key, s3_audio_url=s3_audio_url, is_picture=is_picture, is_video=is_video)
 
 
+@application.route('/result/summary')
+@basic_auth.required
+def summary():
+    page = request.args.get('page', 1, type=int)
+    all_results = db.session.query(Result).order_by(desc(Result.timestamp)).paginate(
+        page, 10, False)
+
+    last_result = Result.query.all()[-1]
+
+    if (last_result):
+        average_spect = get_average_spectrogram(list(map(lambda x: x.reading, last_result.readings)))
+    else:
+        average_spect = ''
+
+    try:
+        s3_audio_url = Config.S3_ENDPOINT + last_result.s3_audio_key
+    except:
+        s3_audio_url = Config.S3_ENDPOINT + ''
+
+    is_picture = True if (last_result.s3_key[-4:] == '.jpg') else False
+    is_video = True if (last_result.s3_key[-4:] == '.mp4') else False
+
+    t_delta = (datetime.datetime.now() - last_result.timestamp)
+
+    hours = t_delta.total_seconds() // 3600
+    minutes = (t_delta.total_seconds() % 3600) // 60
+    seconds = t_delta.total_seconds() % 60
+
+    time_since_last_update = "{hours:.0f} Hours, {minutes:.0f} minutes and {seconds:.0f} seconds".format(hours=hours,minutes=minutes, seconds=seconds)
+
+    next_url = url_for('summary', page=all_results.next_num) if all_results.has_next else None
+    prev_url = url_for('summary', page=all_results.prev_num) if all_results.has_prev else None
+
+    return render_template("show_result_summary.html", time_since_last_update=time_since_last_update, all_results=all_results,last_result=last_result, html_spect=generate_html_spectrogram(average_spect), s3_image_url=Config.S3_ENDPOINT + last_result.s3_key, s3_audio_url=s3_audio_url, is_picture=is_picture, is_video=is_video,  next_url=next_url, prev_url=prev_url)
+
+
 @application.route('/result/pi_id/<pi_id>')
+@basic_auth.required
 def view_result_pi_id(pi_id):
     if request.method == 'GET':
         result = Result.query.filter_by(pi_id=pi_id).first_or_404()
@@ -173,6 +218,7 @@ def view_result_pi_id(pi_id):
 
 
 @application.route('/reading/id/<id>')
+@basic_auth.required
 def view_reading(id):
     if request.method == 'GET':
         reading = Reading.query.filter_by(id=id).first_or_404()
@@ -180,6 +226,7 @@ def view_reading(id):
 
 
 @application.route('/result/json/pi/<pi_id>')
+@basic_auth.required
 def json_result_pi_id(pi_id):
     if request.method == 'GET':
         result = Result.query.filter_by(pi_id=pi_id).first_or_404()
@@ -187,6 +234,7 @@ def json_result_pi_id(pi_id):
 
 
 @application.route('/result/json/id/<id>')
+@basic_auth.required
 def json_result(id):
     if request.method == 'GET':
         result = Result.query.filter_by(id=id).first_or_404()
@@ -194,6 +242,7 @@ def json_result(id):
 
 
 @application.route('/reading/json/<id>')
+@basic_auth.required
 def json_reading(id):
     if request.method == 'GET':
         reading = Reading.query.filter_by(id=id).first_or_404()
@@ -201,12 +250,14 @@ def json_reading(id):
 
 
 @application.route('/result/all')
+@basic_auth.required
 def get_all_results():
     all_json = [i.to_json() for i in Result.query.all()]
     return jsonify(json_list=all_json)
 
 
 @application.route('/reading/all')
+@basic_auth.required
 def get_all_readings():
     all_json = [i.to_json() for i in Reading.query.all()]
     return jsonify(json_list=all_json)
