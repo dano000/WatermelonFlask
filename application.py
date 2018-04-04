@@ -139,6 +139,38 @@ def upload_file():
         return("POST API Endpoint only")
 
 
+@application.route('/reading/avg/normal/<reading_start_id>')
+@basic_auth.required
+def reading_avg_normal(reading_start_id):
+    if request.method == 'GET':
+
+        normal_spects = db.session.query(Result).join('readings').filter(Reading.uv == False, Reading.led == False, Reading.laser == False, Reading.id >= reading_start_id).all()
+
+        normal_avg_spects = [get_average_spectrogram(list(map(lambda x: x.reading, r.readings))).tolist() for r in normal_spects]
+        normal_avg_spects_ripe = [(1 if r.ripe else 0) for r in normal_spects]
+
+        return (json.dumps(
+            {'spects': normal_avg_spects,
+                'features': normal_avg_spects_ripe
+             }
+        ))
+
+@application.route('/reading/avg/uv/<reading_start_id>')
+@basic_auth.required
+def reading_avg_uv(reading_start_id):
+    if request.method == 'GET':
+
+        uv_spects = db.session.query(Result).join('readings').filter(Reading.uv == True, Reading.led == False, Reading.laser == False, Reading.id >= reading_start_id).all()
+
+        uv_avg_spects = [get_average_spectrogram(list(map(lambda x: x.reading, r.readings))).tolist() for r in uv_spects]
+        uv_avg_spects_ripe = [(1 if r.ripe else 0) for r in uv_spects]
+
+        return(json.dumps(
+            {'spects': uv_avg_spects,
+                'features': uv_avg_spects_ripe
+             }
+        ))
+
 @application.route('/result/id/<id>')
 @basic_auth.required
 def view_result(id):

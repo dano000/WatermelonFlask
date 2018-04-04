@@ -16,7 +16,7 @@ url = "http://127.0.0.1:5000/upload"
 image = 'test.mp4'
 audio = 'test2.wav'
 files = {'image': open(image, 'rb'), 'audio': open(audio,'rb')}
-ripe = 'T'
+ripe = 'F'
 datetime_result = datetime.datetime.now()
 unique_id = str(uuid.uuid4()) + os.path.splitext(image)[-1]
 unique_id_audio = str(uuid.uuid4()) + os.path.splitext(audio)[-1]
@@ -59,9 +59,9 @@ la = ['F','F']
 le = ['F','F']
 uv = ['F','T']
 
-r_ids = [260,261]
+r_ids = [262,263]
 data = {
-    'pi_i':'245',
+    'pi_i':'246',
     'r_ids': json.dumps(r_ids),
     'pi_s':'123',
     'r': ripe,
